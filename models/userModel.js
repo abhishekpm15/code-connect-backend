@@ -1,25 +1,44 @@
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
 
-const userSchema = mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
+const userSchema = mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: [true, "Email address already taken"],
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    posts: [
+      {
+        type: String,
+        ref: "Post",
+      },
+    ],
+    votes: Number,
+    savedPosts: [
+      {
+        type: String,
+        ref: "Post",
+      },
+    ],
+    completedPosts: [
+      {
+        type: String,
+        ref: "Post",
+      },
+    ],
   },
-  email: {
-    type: String,
-    required: true,
-    unique: [true, "Email address already taken"],
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  posts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post'
-  }]
-},{
-    timestamps: true
-});
+  {
+    timestamps: true,
+  }
+);
 
-module.exports = mongoose.model("User",userSchema)
+module.exports = mongoose.model("User", userSchema);

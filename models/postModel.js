@@ -1,16 +1,22 @@
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require('uuid');
 
 const postSchema = mongoose.Schema(
   {
+    postId: {
+      type: String,
+      default: uuidv4,
+      unique: true,
+    },
     postedBy: {
       user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-      user:{
+      user: {
         username: String,
         email: String,
-      }
+      },
     },
     description: {
       name: String,
@@ -20,11 +26,15 @@ const postSchema = mongoose.Schema(
         min: Number,
         max: Number,
       },
-      bountyCurrency: String
+      bountyCurrency: String,
     },
-    completed: {
-      type: Boolean,
+    status: {
+      type: String,
     },
+    savedBy:{
+      type: Array,
+      ref: "User"
+    }
   },
   {
     timestamps: true,
