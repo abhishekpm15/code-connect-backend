@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 const postSchema = mongoose.Schema(
   {
@@ -31,10 +31,10 @@ const postSchema = mongoose.Schema(
     status: {
       type: String,
     },
-    savedBy:{
+    savedBy: {
       type: Array,
-      ref: "User"
-    }
+      ref: "User",
+    },
   },
   {
     timestamps: true,
