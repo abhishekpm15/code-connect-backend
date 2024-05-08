@@ -14,7 +14,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
 });
 
 const createPost = asyncHandler(async (req, res) => {
-  const { postName, description, tags, bounty, bountyCurrency, status } =
+  const { postName, description, tags, bounty, bountyCurrency, status, uploadedImageURL, inputs } =
     req.body;
   console.log("request user", req.user);
   const newPost = await Post.create({
@@ -29,6 +29,8 @@ const createPost = asyncHandler(async (req, res) => {
       name: postName,
       message: description,
       tags: tags,
+      uploadedImageURL: uploadedImageURL,
+      inputs: inputs,
       bounty: bounty,
       bountyCurrency: bountyCurrency,
     },
@@ -131,7 +133,8 @@ const myPosts = asyncHandler(async (req, res) => {
 
 const updatePost = asyncHandler(async (req, res) => {
   const postId = req.params.id;
-  const { postName, description, tags, bounty, bountyCurrency, status } = req.body;
+  const { postName, description, tags, bounty, bountyCurrency, status } =
+    req.body;
   console.log("post id", postId);
   try {
     const updatedPost = await Post.findOneAndUpdate(
@@ -160,6 +163,31 @@ const updatePost = asyncHandler(async (req, res) => {
   }
 });
 
+const savedPosts = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        throw new Error("User not found");
+      }
+      console.log("userrrrr", user);
+      const postIds = user.savedPosts;
+      return Post.find({ postId: { $in: postIds } });
+    })
+    .then((posts) => {
+      if (posts.length === 0) {
+        console.log("postIds", postIds);
+        throw new Error("No posts found");
+      }
+      console.log("Posts:", posts);
+      res.status(200).send(posts);
+    })
+    .catch((err) => {
+      console.error("Error fetching posts:", err);
+      res.status(500).send({ error: "Internal Server Error" });
+    });
+});
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -167,4 +195,5 @@ module.exports = {
   savePost,
   myPosts,
   updatePost,
+  savedPosts,
 };

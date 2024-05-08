@@ -22,6 +22,8 @@ const postSchema = mongoose.Schema(
       name: String,
       message: String,
       tags: Array,
+      uploadedImageURL: Array,
+      inputs: Array,
       bounty: {
         min: Number,
         max: Number,
