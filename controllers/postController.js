@@ -14,8 +14,16 @@ const getAllPosts = asyncHandler(async (req, res) => {
 });
 
 const createPost = asyncHandler(async (req, res) => {
-  const { postName, description, tags, bounty, bountyCurrency, status, uploadedImageURL, inputs } =
-    req.body;
+  const {
+    postName,
+    description,
+    tags,
+    bounty,
+    bountyCurrency,
+    status,
+    uploadedImageURL,
+    inputs,
+  } = req.body;
   console.log("request user", req.user);
   const newPost = await Post.create({
     postedBy: {
@@ -108,6 +116,45 @@ const savePost = asyncHandler(async (req, res) => {
   }
 });
 
+const unSavePost = asyncHandler(async (req, res) => {
+  try {
+    const post = await Post.findOne({ postId: req.params.id });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (!user.savedPosts.includes(req.params.id)) {
+      return res.status(400).json({ message: "Post not saved by the user" });
+    }
+    const updatedPost = await Post.findByIdAndUpdate(
+      post._id,
+      { $pull: { savedBy: userId } },
+      { new: true }
+    );
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { savedPosts: req.params.id } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Post unsaved successfully", "post details": updatedPost });
+  } catch (error) {
+    console.error("Error unsaving post:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 const myPosts = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   User.findById(userId)
@@ -196,4 +243,5 @@ module.exports = {
   myPosts,
   updatePost,
   savedPosts,
+  unSavePost,
 };
