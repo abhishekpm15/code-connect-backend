@@ -6,7 +6,6 @@ const postRoutes = require("./routes/postRoutes");
 const cors = require('cors')
 
 require('dotenv').config()
-
 const connectDB = require("./config/connection")
 connectDB();
 

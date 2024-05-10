@@ -64,6 +64,36 @@ const createPost = asyncHandler(async (req, res) => {
   }
 });
 
+const deletePost = asyncHandler(async (req, res) => {
+  const postId = req.params.id;
+  console.log("post id", postId);
+  try {
+    const deletedPost = await Post.findOneAndDelete({ postId });
+    console.log("deleted post", deletedPost);
+    if (!deletedPost) {
+      throw new Error("Post not found");
+    }
+    const user = await User.findByIdAndUpdate(
+      deletedPost.postedBy.user_id,
+      { $pull: { posts: postId } },
+      { new: true }
+    );
+
+    console.log(user);
+
+    if (!user) {
+      throw new Error("User not found or failed to update user's posts");
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Post deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
 const getPost = asyncHandler(async (req, res) => {
   console.log(req.params.id);
   try {
@@ -147,13 +177,15 @@ const unSavePost = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ message: "Post unsaved successfully", "post details": updatedPost });
+    res.status(200).json({
+      message: "Post unsaved successfully",
+      "post details": updatedPost,
+    });
   } catch (error) {
     console.error("Error unsaving post:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 const myPosts = asyncHandler(async (req, res) => {
   const userId = req.user.id;
@@ -183,6 +215,7 @@ const updatePost = asyncHandler(async (req, res) => {
   const { postName, description, tags, bounty, bountyCurrency, status } =
     req.body;
   console.log("post id", postId);
+  console.log("status", status);
   try {
     const updatedPost = await Post.findOneAndUpdate(
       { postId: postId },
@@ -194,6 +227,7 @@ const updatePost = asyncHandler(async (req, res) => {
           bounty: bounty,
           bountyCurrency: bountyCurrency,
         },
+        status: status,
       },
       { new: true }
     );
@@ -244,4 +278,5 @@ module.exports = {
   updatePost,
   savedPosts,
   unSavePost,
+  deletePost,
 };

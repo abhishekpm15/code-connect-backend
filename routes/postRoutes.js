@@ -9,7 +9,8 @@ const {
   myPosts,
   updatePost,
   savedPosts,
-  unSavePost
+  unSavePost,
+  deletePost,
 } = require("../controllers/postController");
 
 router.get("/allPosts", validateToken, getAllPosts);
@@ -20,5 +21,6 @@ router.post("/savePost/:id", validateToken, savePost);
 router.post("/unSavePost/:id", validateToken, unSavePost);
 router.post("/updatePost/:id", validateToken, updatePost);
 router.post("/create", validateToken, createPost);
+router.post("/deletePost/:id", validateToken, deletePost);
 
 module.exports = router;
