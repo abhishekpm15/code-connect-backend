@@ -71,4 +71,15 @@ const loginUser = asyncHandler(async (req, res) => {
   console.log(user);
 });
 
-module.exports = { registerUser, loginUser };
+const myProfile = asyncHandler(async(req,res)=>{
+  console.log('user id', req.user.id)
+  const user = await User.findById(req.user.id);
+  if(user){
+    res.status(200).send(user);
+  }
+  else{
+    res.status(400).send("User not found")
+  }
+})
+
+module.exports = { registerUser, loginUser, myProfile };
