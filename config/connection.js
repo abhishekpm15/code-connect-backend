@@ -13,7 +13,6 @@ const connectDB = async () => {
       return
     })
     .catch((err) => {
-
       setTimeout(() => {
         setInterval(() => {
           if(i == 0){

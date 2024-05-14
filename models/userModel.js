@@ -35,6 +35,18 @@ const userSchema = mongoose.Schema(
         ref: "Post",
       },
     ],
+    displayPic: {
+      type: String,
+    },
+    bio: {
+      type: String,
+    },
+    websiteLinks: [{}],
+    socialLinks: {
+      github: String,
+      twitter: String,
+    },
+    techStack: [],
   },
   {
     timestamps: true,

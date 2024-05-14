@@ -251,7 +251,7 @@ const savedPosts = asyncHandler(async (req, res) => {
       if (!user) {
         throw new Error("User not found");
       }
-      console.log("userrrrr", user);
+      console.log("user", user);
       const postIds = user.savedPosts;
       return Post.find({ postId: { $in: postIds } });
     })

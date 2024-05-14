@@ -53,7 +53,7 @@ const loginUser = asyncHandler(async (req, res) => {
   console.log("user", user);
   console.log("compare", await comparePassword(password, user[0].password));
   if (user && (await comparePassword(password, user[0].password))) {
-    console.log('user[0]s',user[0]._id,user[0].username,user[0].email)
+    console.log("user[0]s", user[0]._id, user[0].username, user[0].email);
     res.status(200).json({
       id: user[0]._id,
       username: user[0].username,
@@ -71,15 +71,33 @@ const loginUser = asyncHandler(async (req, res) => {
   console.log(user);
 });
 
-const myProfile = asyncHandler(async(req,res)=>{
-  console.log('user id', req.user.id)
+const myProfile = asyncHandler(async (req, res) => {
+  console.log("user id", req.user.id);
   const user = await User.findById(req.user.id);
-  if(user){
+  if (user) {
     res.status(200).send(user);
+  } else {
+    res.status(400).send("User not found");
   }
-  else{
-    res.status(400).send("User not found")
-  }
-})
+});
 
-module.exports = { registerUser, loginUser, myProfile };
+const editProfile = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  console.log(req.user.id);
+  console.log(id);
+  const { inputs, message, github, twitter, tags } = req.body;
+  console.log("id", id, inputs, message, github, twitter, tags);
+  const user = await User.findById(id);
+  if (user) {
+    user.bio = message;
+    user.socialLinks = { github, twitter };
+    user.techStack = tags;
+    user.websiteLinks = inputs
+    await user.save();
+    res.status(201).send("Profile updated Successfully");
+  } else {
+    res.status(400).send("User not found");
+  }
+});
+
+module.exports = { registerUser, loginUser, myProfile, editProfile };
