@@ -37,6 +37,10 @@ const postSchema = mongoose.Schema(
       type: Array,
       ref: "User",
     },
+    likes:{
+      type: Array,
+      ref: "user"
+    }
   },
   {
     timestamps: true,

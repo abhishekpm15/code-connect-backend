@@ -11,6 +11,7 @@ const {
   savedPosts,
   unSavePost,
   deletePost,
+  likePost
 } = require("../controllers/postController");
 
 router.get("/allPosts", validateToken, getAllPosts);
@@ -18,6 +19,7 @@ router.get("/getPost/:id", validateToken, getPost);
 router.get("/myPosts", validateToken, myPosts);
 router.get("/savedPosts", validateToken, savedPosts);
 router.post("/savePost/:id", validateToken, savePost);
+router.post("/likePost/:id", validateToken, likePost);
 router.post("/unSavePost/:id", validateToken, unSavePost);
 router.post("/updatePost/:id", validateToken, updatePost);
 router.post("/create", validateToken, createPost);

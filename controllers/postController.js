@@ -269,6 +269,27 @@ const savedPosts = asyncHandler(async (req, res) => {
     });
 });
 
+const likePost = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const postId = req.params.id;
+  console.log("user id", userId);
+  console.log("post id", postId);
+  const post = await Post.findOne({ postId: postId });
+  if (!post) {
+    return res.status(404).json({ error: "Post not found" });
+  }
+  const userLikedIndex = post.likes.indexOf(userId);
+  if (userLikedIndex === -1) {
+    post.likes.push(userId);
+    res.status(200).send("Liked")
+    await post.save();
+  } else {
+    post.likes.splice(userLikedIndex, 1);
+    res.status(200).send("Unliked")
+    await post.save();
+  }
+});
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -279,4 +300,5 @@ module.exports = {
   savedPosts,
   unSavePost,
   deletePost,
+  likePost,
 };
