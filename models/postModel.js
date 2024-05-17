@@ -40,6 +40,10 @@ const postSchema = mongoose.Schema(
     likes:{
       type: Array,
       ref: "user"
+    },
+    interestShown:{
+      type: Array,
+      ref: "user"
     }
   },
   {

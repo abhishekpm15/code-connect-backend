@@ -290,6 +290,30 @@ const likePost = asyncHandler(async (req, res) => {
   }
 });
 
+
+const showInterest = asyncHandler(async(req,res)=>{
+  const postId = req.params.id;
+  const viewerID = req.body.viewerID
+  const viewerEmail = req.body.viewerEmail
+  const viewerName = req.body.viewerName
+  console.log(postId, viewerID, viewerEmail, viewerName)
+  const post = await Post.findOne({postId : postId});
+  if(!post){
+    return res.status(404).json({ error: "Post not found" });
+  }
+  const userInterestIndex = post.interestShown.indexOf(viewerID);
+  if(userInterestIndex === -1){
+    post.interestShown.push(viewerID);;
+    res.status(200).send("Thank you for showing interest ! You will be soon contacted by the owner of this post");
+    await post.save();
+  }
+  else{
+    post.interestShown.splice(userInterestIndex, 1);
+    res.status(200).send("Removed from Interest")
+    await post.save();
+  }
+})
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -301,4 +325,5 @@ module.exports = {
   unSavePost,
   deletePost,
   likePost,
+  showInterest
 };

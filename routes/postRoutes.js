@@ -11,7 +11,8 @@ const {
   savedPosts,
   unSavePost,
   deletePost,
-  likePost
+  likePost,
+  showInterest
 } = require("../controllers/postController");
 
 router.get("/allPosts", validateToken, getAllPosts);
@@ -22,6 +23,7 @@ router.post("/savePost/:id", validateToken, savePost);
 router.post("/likePost/:id", validateToken, likePost);
 router.post("/unSavePost/:id", validateToken, unSavePost);
 router.post("/updatePost/:id", validateToken, updatePost);
+router.post("/showInterest/:id", validateToken, showInterest);
 router.post("/create", validateToken, createPost);
 router.post("/deletePost/:id", validateToken, deletePost);
 
