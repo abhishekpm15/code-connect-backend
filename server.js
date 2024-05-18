@@ -1,20 +1,66 @@
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 5000;
+const http = require("http");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const cors = require('cors')
-
 require('dotenv').config()
 const connectDB = require("./config/connection")
-connectDB();
+const {Server} = require('socket.io')
+const server = http.createServer(app);
 
+let onlineUsers = []
+
+const addUser = (username, socketId) => {
+  !onlineUsers.some((user) => user.username === username) &&
+  onlineUsers.push({username,socketId})
+  console.log('online users',onlineUsers)
+}
+
+const removeUser = (sockerId) => {
+  onlineUsers = onlineUsers.filter((user) => user.socketId !== sockerId)
+  console.log(onlineUsers)
+}
+
+const getUser = (username) => {
+  return onlineUsers.find((user) => user.username === username)
+}
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+  }
+});
+
+io.on("connection",(socket) => {
+  console.log("a user connected");
+  socket.on("newUser",(userid) => {
+    console.log('add user',userid)
+    addUser(userid,socket.id)
+  })
+  socket.on("sendNotification",({viewerName, postedBy})=>{
+    console.log('viewer name, postedBy',viewerName, postedBy);
+    const receiver = getUser(postedBy.user_id)
+    console.log('receiver',receiver)
+    io.to(receiver?.socketId).emit("getNotification",{
+      senderName: viewerName,
+    })
+  })
+  socket.on("disconnect",()=>{
+    removeUser(socket.id)
+    console.log("a user left");
+  })
+})
+
+connectDB();
 app.use(express.json());
 app.use(cors())
 app.use("/user", userRoutes);
 app.use("/post", postRoutes);
 
 
-app.listen(PORT, (req, res) => {
-  console.log("listening on port 5000");
+server.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });

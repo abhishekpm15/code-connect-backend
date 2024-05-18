@@ -281,38 +281,42 @@ const likePost = asyncHandler(async (req, res) => {
   const userLikedIndex = post.likes.indexOf(userId);
   if (userLikedIndex === -1) {
     post.likes.push(userId);
-    res.status(200).send("Liked")
+    res.status(200).send("Liked");
     await post.save();
   } else {
     post.likes.splice(userLikedIndex, 1);
-    res.status(200).send("Unliked")
+    res.status(200).send("Unliked");
     await post.save();
   }
 });
 
-
-const showInterest = asyncHandler(async(req,res)=>{
+const showInterest = asyncHandler(async (req, res) => {
   const postId = req.params.id;
-  const viewerID = req.body.viewerID
-  const viewerEmail = req.body.viewerEmail
-  const viewerName = req.body.viewerName
-  console.log(postId, viewerID, viewerEmail, viewerName)
-  const post = await Post.findOne({postId : postId});
-  if(!post){
+  const viewerID = req.body.viewerID;
+  const viewerEmail = req.body.viewerEmail;
+  const viewerName = req.body.viewerName;
+  console.log(postId, viewerID, viewerEmail, viewerName);
+  const post = await Post.findOne({ postId: postId });
+  if (!post) {
     return res.status(404).json({ error: "Post not found" });
   }
   const userInterestIndex = post.interestShown.indexOf(viewerID);
-  if(userInterestIndex === -1){
-    post.interestShown.push(viewerID);;
-    res.status(200).send("Thank you for showing interest ! You will be soon contacted by the owner of this post");
+  if (userInterestIndex === -1) {
+    post.interestShown.push(viewerID);
+    console.log("interest", post);
+    res
+      .status(200)
+      .send(
+        "Thank you for showing interest ! You will be soon contacted by the owner of this post"
+      );
     await post.save();
-  }
-  else{
+  } else {
     post.interestShown.splice(userInterestIndex, 1);
-    res.status(200).send("Removed from Interest")
+    console.log("interest", post);
+    res.status(200).send("Removed from Interest");
     await post.save();
   }
-})
+});
 
 module.exports = {
   createPost,
@@ -325,5 +329,5 @@ module.exports = {
   unSavePost,
   deletePost,
   likePost,
-  showInterest
+  showInterest,
 };
