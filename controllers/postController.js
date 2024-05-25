@@ -3,14 +3,26 @@ const Post = require("../models/postModel");
 const User = require("../models/userModel");
 
 const getAllPosts = asyncHandler(async (req, res) => {
-  await Post.find({})
-    .then((response) => {
-      res.status(200).send(response);
-    })
-    .catch((err) => {
-      console.log("posts err", err);
-      throw new Error("Cannot fetch");
+  console.log('page',req.query.page)
+  console.log('number',req.query.limit)
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const [posts, totalCount] = await Promise.all([
+      Post.find().skip(skip).limit(limit),
+      Post.countDocuments(),
+    ]);
+
+    res.status(200).json({
+      posts,
+      totalCount,
     });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 const createPost = asyncHandler(async (req, res) => {

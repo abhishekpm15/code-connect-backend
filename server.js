@@ -48,6 +48,16 @@ io.on("connection", (socket) => {
       senderName: viewerName,
     });
   });
+
+  socket.on("sendLike",(id)=>{
+    console.log("send like post id",id)
+    socket.broadcast.emit("getLike",id);
+  })
+  socket.on("unsendLike",(id)=>{
+    console.log("send like post id",id)
+    socket.broadcast.emit("removeLike",id);
+  })
+
   socket.on("disconnect", () => {
     removeUser(socket.id);
     console.log("a user left");
