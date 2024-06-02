@@ -3,8 +3,8 @@ const Post = require("../models/postModel");
 const User = require("../models/userModel");
 
 const getAllPosts = asyncHandler(async (req, res) => {
-  console.log('page',req.query.page)
-  console.log('number',req.query.limit)
+  console.log("page", req.query.page);
+  console.log("number", req.query.limit);
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
@@ -158,6 +158,25 @@ const savePost = asyncHandler(async (req, res) => {
   }
 });
 
+const getSavedBy = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const postId = req.params.id;
+  console.log("userId postId", userId, postId);
+  try {
+    const post = await Post.findOne({ postId: req.params.id }).select("savedBy");
+    if (!post) {
+      res.status(404);
+      throw new Error("Post not found");
+    }
+    const isSavedByUser = post.savedBy.includes(userId);
+    console.log("isSavedBY", isSavedByUser);
+    res.status(200).json({ savedByUser: isSavedByUser });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Server Error");
+  }
+});
+
 const unSavePost = asyncHandler(async (req, res) => {
   try {
     const post = await Post.findOne({ postId: req.params.id });
@@ -281,6 +300,32 @@ const savedPosts = asyncHandler(async (req, res) => {
     });
 });
 
+const interestedPosts = asyncHandler(async (req, res) => {
+  console.log("received`");
+  const userId = req.user.id;
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        throw new Error("User not found");
+      }
+      console.log("user", user);
+      const postIds = user.interestShown;
+      return Post.find({ postId: { $in: postIds } });
+    })
+    .then((posts) => {
+      if (posts.length === 0) {
+        console.log("postIds", postIds);
+        throw new Error("No posts found");
+      }
+      console.log("Posts:", posts);
+      res.status(200).send(posts);
+    })
+    .catch((err) => {
+      console.error("Error fetching posts:", err);
+      res.status(500).send({ error: "Internal Server Error" });
+    });
+});
+
 const likePost = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const postId = req.params.id;
@@ -330,6 +375,28 @@ const showInterest = asyncHandler(async (req, res) => {
   }
 });
 
+const searchPost = asyncHandler(async (req, res) => {
+  try {
+    console.log("search value", req.params.searchValue);
+    const searchValue = req.params.searchValue;
+    const posts = await Post.find({
+      $or: [
+        { "description.name": { $regex: searchValue, $options: "i" } },
+        { "description.tags": { $regex: searchValue, $options: "i" } },
+      ],
+    });
+
+    if (posts.length > 0) {
+      res.status(200).json(posts);
+    } else {
+      res.status(404).json({ message: "No posts found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -342,4 +409,7 @@ module.exports = {
   deletePost,
   likePost,
   showInterest,
+  searchPost,
+  interestedPosts,
+  getSavedBy,
 };

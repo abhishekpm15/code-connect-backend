@@ -12,19 +12,25 @@ const server = http.createServer(app);
 
 let onlineUsers = [];
 
-const addUser = (username, socketId) => {
-  !onlineUsers.some((user) => user.username === username) &&
-    onlineUsers.push({ username, socketId });
+const addUser = (userID, socketId) => {
+  const userExists = onlineUsers.some((user) => user.userID === userID);
+  if (userExists) {
+    onlineUsers = onlineUsers.map((user) =>
+      user.userID === userID ? { ...user, socketId } : user
+    );
+  } else {
+    onlineUsers.push({ userID, socketId });
+  }
   console.log("online users", onlineUsers);
 };
 
-const removeUser = (sockerId) => {
-  onlineUsers = onlineUsers.filter((user) => user.socketId !== sockerId);
-  console.log(onlineUsers);
+const removeUser = (socketId) => {
+  onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+  console.log("online users after removal", onlineUsers);
 };
 
-const getUser = (username) => {
-  return onlineUsers.find((user) => user.username === username);
+const getUser = (userID) => {
+  return onlineUsers.find((user) => user.userID === userID);
 };
 
 const io = new Server(server, {
@@ -36,31 +42,32 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("a user connected");
-  socket.on("newUser", (userid) => {
-    console.log("add user", userid);
-    addUser(userid, socket.id);
-  });
-  socket.on("sendNotification", ({ viewerName, postedBy }) => {
-    console.log("viewer name, postedBy", viewerName, postedBy);
-    const receiver = getUser(postedBy.user_id);
-    console.log("receiver", receiver);
-    io.to(receiver?.socketId).emit("getNotification", {
-      senderName: viewerName,
-    });
+
+  socket.on("newUser", (userID) => {
+    addUser(userID, socket.id);
   });
 
-  socket.on("sendLike",(id)=>{
-    console.log("send like post id",id)
-    socket.broadcast.emit("getLike",id);
-  })
-  socket.on("unsendLike",(id)=>{
-    console.log("send like post id",id)
-    socket.broadcast.emit("removeLike",id);
-  })
+  socket.on("sendNotification", ({ viewerName, viewerID, postedBy }) => {
+    const receiver = getUser(postedBy.user_id);
+    if (receiver) {
+      io.to(receiver.socketId).emit("getNotification", {
+        senderName: viewerName,
+        receiverId: postedBy.user_id,
+      });
+    }
+  });
+
+  socket.on("sendLike", (id) => {
+    socket.broadcast.emit("getLike", id);
+  });
+
+  socket.on("unsendLike", (id) => {
+    socket.broadcast.emit("removeLike", id);
+  });
 
   socket.on("disconnect", () => {
     removeUser(socket.id);
-    console.log("a user left");
+    console.log("a user disconnected");
   });
 });
 
@@ -70,6 +77,6 @@ app.use(cors());
 app.use("/user", userRoutes);
 app.use("/post", postRoutes);
 
-server.listen(PORT, '0.0.0.0',() => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Listening on port ${PORT}`);
 });
