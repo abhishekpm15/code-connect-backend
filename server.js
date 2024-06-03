@@ -4,6 +4,7 @@ const PORT = process.env.PORT || 5001;
 const http = require("http");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
+const notificationRoutes = require("./routes/notificationRoutes")
 const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./config/connection");
@@ -76,6 +77,8 @@ app.use(express.json());
 app.use(cors());
 app.use("/user", userRoutes);
 app.use("/post", postRoutes);
+app.use("/notification", notificationRoutes);
+
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Listening on port ${PORT}`);

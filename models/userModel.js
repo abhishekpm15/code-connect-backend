@@ -53,6 +53,12 @@ const userSchema = mongoose.Schema(
       twitter: String,
     },
     techStack: [],
+    notifications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notification",
+      },
+    ],
   },
   {
     timestamps: true,
