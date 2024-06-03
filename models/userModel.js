@@ -29,6 +29,12 @@ const userSchema = mongoose.Schema(
         ref: "Post",
       },
     ],
+    interestedPosts: [
+      {
+        type: String,
+        ref: "Post",
+      },
+    ],
     completedPosts: [
       {
         type: String,

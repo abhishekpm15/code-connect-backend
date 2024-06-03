@@ -37,14 +37,14 @@ const postSchema = mongoose.Schema(
       type: Array,
       ref: "User",
     },
-    likes:{
+    likes: {
       type: Array,
-      ref: "user"
+      ref: "User",
     },
-    interestShown:{
+    interestShown: {
       type: Array,
-      ref: "user"
-    }
+      ref: "User",
+    },
   },
   {
     timestamps: true,

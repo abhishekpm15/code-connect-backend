@@ -124,34 +124,40 @@ const getPost = asyncHandler(async (req, res) => {
 const savePost = asyncHandler(async (req, res) => {
   try {
     const post = await Post.findOne({ postId: req.params.id });
-    console.log("id", req.params.id);
     if (!post) {
-      res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ message: "Post not found" });
     }
+
     const userId = req.user.id;
     const user = await User.findById(userId);
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
-    console.log("saved posts", user.savedPosts);
+
     if (user.savedPosts.includes(req.params.id)) {
-      res.status(400).json({ message: "Post already saved by the user" });
+      return res
+        .status(400)
+        .json({ message: "Post already saved by the user" });
     }
+
     if (!post.savedBy.includes(userId)) {
       post.savedBy.push(userId);
       await post.save();
     }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $addToSet: { savedPosts: req.params.id } },
       { new: true }
     );
+
     if (!updatedUser) {
-      res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
+
     res
       .status(200)
-      .json({ message: "Post saved successfully", "post details": post });
+      .json({ message: "Post saved successfully", postDetails: post });
   } catch (error) {
     console.error("Error saving post:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -163,7 +169,9 @@ const getSavedBy = asyncHandler(async (req, res) => {
   const postId = req.params.id;
   console.log("userId postId", userId, postId);
   try {
-    const post = await Post.findOne({ postId: req.params.id }).select("savedBy");
+    const post = await Post.findOne({ postId: req.params.id }).select(
+      "savedBy"
+    );
     if (!post) {
       res.status(404);
       throw new Error("Post not found");
@@ -301,7 +309,6 @@ const savedPosts = asyncHandler(async (req, res) => {
 });
 
 const interestedPosts = asyncHandler(async (req, res) => {
-  console.log("received`");
   const userId = req.user.id;
   User.findById(userId)
     .then((user) => {
@@ -309,12 +316,13 @@ const interestedPosts = asyncHandler(async (req, res) => {
         throw new Error("User not found");
       }
       console.log("user", user);
-      const postIds = user.interestShown;
+      const postIds = user.interestedPosts;
+      console.log('post ids',postIds)
       return Post.find({ postId: { $in: postIds } });
     })
     .then((posts) => {
       if (posts.length === 0) {
-        console.log("postIds", postIds);
+        console.log("postIds", posts);
         throw new Error("No posts found");
       }
       console.log("Posts:", posts);
@@ -348,30 +356,47 @@ const likePost = asyncHandler(async (req, res) => {
 });
 
 const showInterest = asyncHandler(async (req, res) => {
-  const postId = req.params.id;
-  const viewerID = req.body.viewerID;
-  const viewerEmail = req.body.viewerEmail;
-  const viewerName = req.body.viewerName;
-  console.log(postId, viewerID, viewerEmail, viewerName);
-  const post = await Post.findOne({ postId: postId });
-  if (!post) {
-    return res.status(404).json({ error: "Post not found" });
-  }
-  const userInterestIndex = post.interestShown.indexOf(viewerID);
-  if (userInterestIndex === -1) {
-    post.interestShown.push(viewerID);
-    console.log("interest", post);
-    res
-      .status(200)
-      .send(
-        "Thank you for showing interest ! You will be soon contacted by the owner of this post"
-      );
-    await post.save();
-  } else {
-    post.interestShown.splice(userInterestIndex, 1);
-    console.log("interest", post);
-    res.status(200).send("Removed from Interest");
-    await post.save();
+  try {
+    const postId = req.params.id;
+    const viewerID = req.body.viewerID;
+    const viewerEmail = req.body.viewerEmail;
+    const viewerName = req.body.viewerName;
+    console.log(postId, viewerID, viewerEmail, viewerName);
+    const post = await Post.findOne({ postId: postId });
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    const user = await User.findById(viewerID);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const userInterestIndex = post.interestShown.indexOf(viewerID);
+    if (userInterestIndex === -1) {
+      post.interestShown.push(viewerID);
+      console.log("interest", post);
+      user.interestedPosts.push(postId);
+      await post.save();
+      await user.save();
+      console.log("interest added", post);
+      console.log("interest usre", user);
+      res
+        .status(200)
+        .send(
+          "Thank you for showing interest! You will be soon contacted by the owner of this post"
+        );
+    } else {
+      post.interestShown.splice(userInterestIndex, 1);
+      console.log("interest", post);
+      user.interestedPosts.pull(postId);
+      await post.save();
+      await user.save();
+      console.log("interest removed", post);
+      console.log("interest usre", user);
+      res.status(200).send("Removed from Interest");
+    }
+  } catch (error) {
+    console.error("Error showing interest:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
