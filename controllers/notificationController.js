@@ -44,4 +44,26 @@ const sendNotification = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { fetchAllNotifications, sendNotification };
+
+const removeNotification =asyncHandler(async(req,res)=>{
+  console.log('user id', req.user.id);
+  const userId = req.user.id;
+  console.log('notitication id', req.params.id)
+  const notificationId = req.params.id;
+  const notifictations = await Notification.find({userId : userId})
+  console.log('notification found',notifictations)
+  if(notifictations && notifictations.length > 0){
+    const notificationToDelete = notifictations.find(notification => notification._id.toString() === notificationId);
+    if (notificationToDelete) {
+      await Notification.findByIdAndDelete(notificationId);
+      const updatedNotifications = await Notification.find({ userId: userId });
+      res.status(200).send(updatedNotifications)
+      console.log('Notification deleted:', notificationToDelete);
+    } else {
+      console.log('Notification not found');
+      res.status(400).json({message: "Could not delete notification"})
+    }
+  }
+})
+
+module.exports = { fetchAllNotifications, sendNotification, removeNotification };
