@@ -11,7 +11,7 @@ const validateToken = asyncHandler(async (req, res, next) => {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
       if (err) {
         console.log(err);
-        res.status(401);
+        res.status(401).send({authorized: false, message: "User is not authorized"});
         throw new Error("User is not authorized");
       }
       console.log('decoded',decoded);
@@ -19,7 +19,7 @@ const validateToken = asyncHandler(async (req, res, next) => {
       next();
     });
   } else {
-    res.status(401);
+    res.status(401).send({message: "Header is missing / not authorized"});
     throw new Error("User is not authorized or token is missing");
   }
 });
