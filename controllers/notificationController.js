@@ -39,7 +39,7 @@ const sendNotification = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Error sending notification:", error);
     res
-      .status(500)
+      .status(401)
       .json({ message: "Failed to send notification", error: error.message });
   }
 });
