@@ -74,6 +74,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const myProfile = asyncHandler(async (req, res) => {
   console.log("user id", req.user.id);
   const user = await User.findById(req.user.id);
+  console.log('user ',user)
   if (user) {
     res.status(200).send(user);
   } else {
@@ -100,4 +101,17 @@ const editProfile = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { registerUser, loginUser, myProfile, editProfile };
+const getProfile = asyncHandler(async(req,res) => {
+  const userId = req.params.id;
+  console.log("user id", userId)
+  const user = await User.findById({_id:userId});
+  console.log('user',user)
+  if (user) {
+    console.log('user',user)
+    res.status(200).send(user);
+  } else {
+    res.status(400).send("User not found");
+  }
+})
+
+module.exports = { registerUser, loginUser, myProfile, editProfile, getProfile };
