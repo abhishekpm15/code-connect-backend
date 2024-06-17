@@ -23,11 +23,19 @@ const sendNotification = asyncHandler(async (req, res) => {
   const post = await Post.findOne({ postId: postID });
   const postName = post.description.name;
   console.log(post.description.name);
+
   const newNotification = new Notification({
     userId: postedBy.user_id,
     notifications: {
       title: "New Notification",
       message: `Received interest from "${viewerName}" on Post "${postName}"`,
+      sentBy: userId,
+      postInfo:{
+        postID: postID,
+        postName: postName
+      },
+      date: new Date(),
+      read: false,
     },
   });
   try {

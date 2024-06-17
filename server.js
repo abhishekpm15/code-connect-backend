@@ -57,6 +57,19 @@ io.on("connection", (socket) => {
       });
     }
   });
+  socket.on("sendAcceptNotification", ({sendToUserId, userName, userId, userEmail, postID,postName }) => {
+    console.log('ppostnamme', postName)
+    const receiver = getUser(sendToUserId);
+    if (receiver) {
+      io.to(receiver.socketId).emit("getAcceptNotification", {
+        senderName: userName,
+        senderId: userId,
+        receiverId: sendToUserId,
+        postInfo: postID,
+        postName: postName
+      });
+    }
+  });
 
   socket.on("sendLike", (id) => {
     socket.broadcast.emit("getLike", id);
