@@ -8,6 +8,7 @@ const notificationSchema = mongoose.Schema(
       required: true,
     },
     notifications: {
+      type: {type: String, required: true},
       title: { type: String, required: true },
       message: { type: String, required: true },
       sentBy:{type: String},

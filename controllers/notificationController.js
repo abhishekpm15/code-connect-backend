@@ -27,6 +27,7 @@ const sendNotification = asyncHandler(async (req, res) => {
   const newNotification = new Notification({
     userId: postedBy.user_id,
     notifications: {
+      type: "Interest",
       title: "New Notification",
       message: `Received interest from "${viewerName}" on Post "${postName}"`,
       sentBy: userId,
