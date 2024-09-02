@@ -74,7 +74,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const myProfile = asyncHandler(async (req, res) => {
   console.log("user id", req.user.id);
   const user = await User.findById(req.user.id);
-  console.log('user ',user)
+  console.log("user ", user);
   if (user) {
     res.status(200).send(user);
   } else {
@@ -93,7 +93,7 @@ const editProfile = asyncHandler(async (req, res) => {
     user.bio = message;
     user.socialLinks = { github, twitter };
     user.techStack = tags;
-    user.websiteLinks = inputs
+    user.websiteLinks = inputs;
     await user.save();
     res.status(201).send("Profile updated Successfully");
   } else {
@@ -101,17 +101,48 @@ const editProfile = asyncHandler(async (req, res) => {
   }
 });
 
-const getProfile = asyncHandler(async(req,res) => {
+const getProfile = asyncHandler(async (req, res) => {
   const userId = req.params.id;
-  console.log("user id", userId)
-  const user = await User.findById({_id:userId});
-  console.log('user',user)
+  console.log("user id", userId);
+  const user = await User.findById({ _id: userId });
+  console.log("user", user);
   if (user) {
-    console.log('user',user)
+    console.log("user", user);
     res.status(200).send(user);
   } else {
     res.status(400).send("User not found");
   }
-})
+});
 
-module.exports = { registerUser, loginUser, myProfile, editProfile, getProfile };
+const getTotalBounty = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+  console.log("User ID is", userId);
+
+  try {
+    const user = await User.findById(userId).populate("completedPosts");
+    if (!user) {
+      return res.sendStatus(404);
+    }
+
+    const completedPosts = user.completedPosts;
+    const totalBounty = completedPosts.reduce(
+      (total, post) => total + (post.description.bounty.max || 0),
+      0
+    );
+
+    console.log("Total bounty", totalBounty);
+    res.status(200).send({ totalBounty });
+  } catch (error) {
+    console.error("Error calculating total bounty", error);
+    res.sendStatus(500);
+  }
+});
+
+module.exports = {
+  registerUser,
+  loginUser,
+  myProfile,
+  editProfile,
+  getProfile,
+  getTotalBounty,
+};

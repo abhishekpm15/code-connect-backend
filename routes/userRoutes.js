@@ -5,7 +5,8 @@ const {
   loginUser,
   myProfile,
   editProfile,
-  getProfile
+  getProfile,
+  getTotalBounty
 } = require("../controllers/userController");
 const validateToken = require("../middlewares/validateToken");
 
@@ -14,6 +15,7 @@ router.post("/login", loginUser);
 router.get("/myProfile", validateToken, myProfile);
 router.get("/getProfile/:id", validateToken, getProfile);
 router.post("/edit/:id", validateToken, editProfile);
+router.get("/getTotalBounty/:id",validateToken, getTotalBounty);
 
 
 module.exports = router;

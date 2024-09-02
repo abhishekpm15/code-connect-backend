@@ -19,26 +19,26 @@ const userSchema = mongoose.Schema(
     posts: [
       {
         type: String,
-        ref: "Post",
+        ref: "Posts",
       },
     ],
     votes: Number,
     savedPosts: [
       {
         type: String,
-        ref: "Post",
+        ref: "Posts",
       },
     ],
     interestedPosts: [
       {
         type: String,
-        ref: "Post",
+        ref: "Posts",
       },
     ],
     completedPosts: [
       {
         type: String,
-        ref: "Post",
+        ref: "Posts",
       },
     ],
     displayPic: {
