@@ -45,6 +45,17 @@ const postSchema = mongoose.Schema(
       type: Array,
       ref: "User",
     },
+    acceptedBy: {
+      isAccepted: {
+        type: Boolean,
+        default: false,
+      },
+      user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null, 
+      },
+    },
   },
   {
     timestamps: true,

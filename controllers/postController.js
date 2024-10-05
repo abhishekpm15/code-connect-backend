@@ -422,6 +422,35 @@ const searchPost = asyncHandler(async (req, res) => {
   }
 });
 
+const stashPost = asyncHandler(async (req, res) => {
+  const { postID } = req.params;
+  const userId = req.user.id;
+  console.log("my user id", userId);
+  try {
+    const post = await Post.findOneAndUpdate(
+      { postId: postID },
+      {
+        $set: {
+          status: "stashed", 
+          acceptedBy: {
+            isAccepted: true,
+            user_id: userId,
+          },
+        },
+      },
+      { new: true }
+    );
+    if (!post) {
+      return res.status(404).send({ message: "Post not found" });
+    }
+    console.log("AFter post stashed" , post);
+    return res.status(200).send({ message: "Post accepted", post });
+  } catch (err) {
+    console.error("Error accepting post", err);
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -437,4 +466,5 @@ module.exports = {
   searchPost,
   interestedPosts,
   getSavedBy,
+  stashPost
 };
