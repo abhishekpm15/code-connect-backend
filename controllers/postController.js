@@ -424,6 +424,7 @@ const searchPost = asyncHandler(async (req, res) => {
 
 const stashPost = asyncHandler(async (req, res) => {
   const { postID } = req.params;
+  const {receiverId} = req.body;
   const userId = req.user.id;
   console.log("my user id", userId);
   try {
@@ -434,7 +435,7 @@ const stashPost = asyncHandler(async (req, res) => {
           status: "stashed", 
           acceptedBy: {
             isAccepted: true,
-            user_id: userId,
+            user_id: receiverId,
           },
         },
       },
