@@ -16,7 +16,8 @@ const {
   searchPost,
   interestedPosts,
   getSavedBy,
-  stashPost
+  stashPost,
+  postSolved
 } = require("../controllers/postController");
 
 router.get("/allPosts", validateToken, getAllPosts);
@@ -34,4 +35,5 @@ router.post("/showInterest/:id", validateToken, showInterest);
 router.post("/create", validateToken, createPost);
 router.post("/deletePost/:id", validateToken, deletePost);
 router.post("/stashPost/:postID",validateToken,stashPost);
+router.post("/postSolved/:postID",validateToken,postSolved);
 module.exports = router;

@@ -452,6 +452,55 @@ const stashPost = asyncHandler(async (req, res) => {
   }
 });
 
+const postSolved = asyncHandler(async (req, res) => {
+  const { postID } = req.params; // Post ID from the request parameters
+  const userId = req.user.id; // Assuming authenticated user ID is in `req.user`
+  console.log("User ID: " + userId);
+  console.log("Post ID: " + postID);
+
+  try {
+    const post = await Post.findOneAndUpdate(
+      { postId: postID },
+      {
+        $set: {
+          status: "completed",
+        },
+      },
+      { new: true }
+    );
+
+    if (!post) {
+      return res.status(404).send({ message: "Post not found" });
+    }
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { completedPosts: postID } }, // Add postID to completedPosts array if not already present
+      { new: true } // Return the updated user document
+    );
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    console.log("Post marked as completed:", post);
+    console.log("User completed posts updated:", user);
+
+    return res.status(200).send({
+      message: "Post marked as completed",
+      post,
+    });
+  } catch (error) {
+    console.error("Error marking post as solved:", error);
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+
+
+
+
+
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -467,5 +516,6 @@ module.exports = {
   searchPost,
   interestedPosts,
   getSavedBy,
-  stashPost
+  stashPost,
+  postSolved
 };
